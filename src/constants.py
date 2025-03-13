@@ -1,0 +1,21 @@
+# Game constants
+GRAVITY = 1200
+JUMP_POWER = -600
+PLAYER_SPEED = 300
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+PURPLE = (128, 0, 128)
+ORANGE = (255, 165, 0)
+YELLOW = (255, 255, 0)
+LIGHT_BLUE = (173, 216, 230)
+
+# Game settings
+RESPAWN_DELAY = 1.5  # seconds
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+FPS = 60
