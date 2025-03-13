@@ -1,7 +1,7 @@
 import pygame
 import time
 from constants import PURPLE, WHITE, SCREEN_WIDTH, SCREEN_HEIGHT, FPS
-from entities import Player, Lightning
+from entities import Player, Lightning, BlackHole
 from game_state import GameState
 from utils import (
     init_pygame,
@@ -10,17 +10,20 @@ from utils import (
     render_text,
     render_game_over,
     render_counter,
+    render_black_hole_warning,
 )
 
 
 def main():
     # Initialize pygame
     screen, clock = init_pygame(SCREEN_WIDTH, SCREEN_HEIGHT)
+    pygame.display.set_caption("Platform Game with Black Hole")
 
     # Create game objects
     player = Player(SCREEN_WIDTH, SCREEN_HEIGHT)
     platforms = create_game_platforms()
     fire_pit = create_fire_pit()
+    black_hole = BlackHole(SCREEN_WIDTH, SCREEN_HEIGHT)
     game_state = GameState()
 
     # Main game font
@@ -61,6 +64,12 @@ def main():
         if game_state.game_over:
             game_state.check_respawn(player)
         else:
+            # Get elapsed time for black hole activation
+            elapsed_time = game_state.get_elapsed_time()
+
+            # Update black hole
+            black_hole.update(dt, elapsed_time, player)
+
             # Update player
             player.update(dt, keys, platforms, SCREEN_WIDTH, SCREEN_HEIGHT)
 
@@ -69,6 +78,10 @@ def main():
                 game_state.handle_death()
 
             if game_state.check_lightning_collisions(player.pos):
+                game_state.handle_death()
+
+            # Check if player goes off the top of the screen (sucked by black hole)
+            if player.pos.y < -player.size * 2:
                 game_state.handle_death()
 
         # Update fire animation
@@ -88,6 +101,9 @@ def main():
         # Draw fire pit
         fire_pit.draw(screen)
 
+        # Draw black hole
+        black_hole.draw(screen)
+
         # Draw lightning strikes
         for lightning in game_state.lightning_strikes:
             lightning.draw(screen)
@@ -102,6 +118,13 @@ def main():
 
         # Draw movement counter in top right
         render_counter(screen, counter_font, game_state.movement_counter, SCREEN_WIDTH)
+
+        # Show black hole warning if approaching spawn time
+        elapsed_time = game_state.get_elapsed_time()
+        if elapsed_time > 25 and elapsed_time < 30 and not black_hole.active:
+            render_black_hole_warning(
+                screen, counter_font, elapsed_time, SCREEN_WIDTH, SCREEN_HEIGHT
+            )
 
         # Flip the display to put work on screen
         pygame.display.flip()

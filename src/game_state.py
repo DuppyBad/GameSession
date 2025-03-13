@@ -16,6 +16,10 @@ class GameState:
             pygame.K_SPACE: False,
         }
         self.lightning_strikes = []
+        self.start_time = time.time()
+
+    def get_elapsed_time(self):
+        return time.time() - self.start_time
 
     def check_movement_keys(self, keys, player_pos):
         # Check each movement key
@@ -64,3 +68,4 @@ class GameState:
         player.reset()
         self.game_over = False
         self.lightning_strikes = []
+        self.start_time = time.time()  # Reset the start time for black hole

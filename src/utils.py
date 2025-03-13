@@ -61,3 +61,18 @@ def render_counter(screen, counter_font, counter, width):
 
     counter_text = counter_font.render(f"Moves: {counter}", True, WHITE)
     screen.blit(counter_text, (width - counter_text.get_width() - 20, 20))
+
+
+def render_black_hole_warning(screen, font, elapsed_time, width, height):
+    """Render the black hole warning"""
+    from constants import RED
+
+    seconds_left = int(30 - elapsed_time)
+    warning_text = font.render(f"WARNING: Black Hole in {seconds_left}s!", True, RED)
+
+    # Make it pulse for emphasis
+    if seconds_left % 2 == 0:
+        screen.blit(
+            warning_text,
+            (width // 2 - warning_text.get_width() // 2, 60),
+        )
