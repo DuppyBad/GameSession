@@ -47,6 +47,14 @@ class GameState:
                 return True
         return False
 
+    def check_black_hole_collision(self, player, black_hole):
+        # Check if player is being crushed by black hole
+        if player in [e["entity"] for e in black_hole.crushing_entities]:
+            return True
+        # Check if player is completely inside black hole
+        distance = (player.pos - black_hole.pos).length()
+        return distance < black_hole.radius - player.size
+
     def update_lightnings(self, current_time):
         for i in range(len(self.lightning_strikes) - 1, -1, -1):
             if not self.lightning_strikes[i].update(current_time):

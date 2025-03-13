@@ -10,14 +10,13 @@ from utils import (
     render_text,
     render_game_over,
     render_counter,
-    render_black_hole_warning,
 )
 
 
 def main():
     # Initialize pygame
     screen, clock = init_pygame(SCREEN_WIDTH, SCREEN_HEIGHT)
-    pygame.display.set_caption("Platform Game with Black Hole")
+    pygame.display.set_caption("Normal Day in Coventry")
 
     # Create game objects
     player = Player(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -48,6 +47,11 @@ def main():
                     player.jump()
                 if event.key == pygame.K_r:  # Restart with R key
                     game_state.restart_game(player)
+                    platforms = create_game_platforms()  # Reset platforms
+                    fire_pit = create_fire_pit()  # Reset fire pit
+                    black_hole = BlackHole(
+                        SCREEN_WIDTH, SCREEN_HEIGHT
+                    )  # New black hole
 
         # Get pressed keys
         keys = pygame.key.get_pressed()
@@ -62,13 +66,13 @@ def main():
 
         # Handle game over and respawn
         if game_state.game_over:
-            game_state.check_respawn(player)
+            if game_state.check_respawn(player):
+                platforms = create_game_platforms()  # Reset platforms
+                fire_pit = create_fire_pit()  # Reset fire pit
+                black_hole = BlackHole(SCREEN_WIDTH, SCREEN_HEIGHT)  # New black hole
         else:
-            # Get elapsed time for black hole activation
-            elapsed_time = game_state.get_elapsed_time()
-
             # Update black hole
-            black_hole.update(dt, elapsed_time, player)
+            black_hole.update(dt, player, platforms, fire_pit)
 
             # Update player
             player.update(dt, keys, platforms, SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -80,8 +84,17 @@ def main():
             if game_state.check_lightning_collisions(player.pos):
                 game_state.handle_death()
 
-            # Check if player goes off the top of the screen (sucked by black hole)
-            if player.pos.y < -player.size * 2:
+            # Check black hole collision
+            if game_state.check_black_hole_collision(player, black_hole):
+                game_state.handle_death()
+
+            # Check if player goes off the screen (sucked by black hole)
+            if (
+                player.pos.y < -player.size * 2
+                or player.pos.y > SCREEN_HEIGHT + player.size * 2
+                or player.pos.x < -player.size * 2
+                or player.pos.x > SCREEN_WIDTH + player.size * 2
+            ):
                 game_state.handle_death()
 
         # Update fire animation
@@ -118,13 +131,6 @@ def main():
 
         # Draw movement counter in top right
         render_counter(screen, counter_font, game_state.movement_counter, SCREEN_WIDTH)
-
-        # Show black hole warning if approaching spawn time
-        elapsed_time = game_state.get_elapsed_time()
-        if elapsed_time > 25 and elapsed_time < 30 and not black_hole.active:
-            render_black_hole_warning(
-                screen, counter_font, elapsed_time, SCREEN_WIDTH, SCREEN_HEIGHT
-            )
 
         # Flip the display to put work on screen
         pygame.display.flip()
