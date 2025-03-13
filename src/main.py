@@ -424,6 +424,7 @@ while running:
     if game_over:
         game_over_text = game_font.render("Ow ow ow fire...", True, RED)
         respawn_text = game_font.render("Respawning...", True, WHITE)
+        # blit the message overlaying the game over message
         screen.blit(
             game_over_text,
             (
