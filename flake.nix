@@ -10,7 +10,6 @@
     nixpkgs,
   }: let
     # List of supported systems
-    # Surprisingly, it does actually compile on darwin, but we do not truly support MacOS
     supportedSystems = [
       "x86_64-linux"
       "aarch64-linux"
