@@ -11,9 +11,9 @@ class BlackHole:
             random.randint(screen_width // 4, screen_width * 3 // 4),
             random.randint(100, 200),
         )
-        self.attraction_force = 150  # Increased initial force
-        self.max_attraction = 400  # Increased maximum force
-        self.active = False  # Start active immediately
+        self.attraction_force = 600  # Increased initial force
+        self.max_attraction = 1500  # Increased maximum force
+        self.active = False
         self.pulse_speed = 5
         self.current_pulse = 0
         self.growing = True
@@ -97,7 +97,6 @@ class BlackHole:
         return distance < self.radius - size / 2
 
     def _update_crushing_animation(self, dt, platforms, fire_pit, player):
-        # Update each crushing entity
         for i in range(len(self.crushing_entities) - 1, -1, -1):
             entity_data = self.crushing_entities[i]
             entity_data["scale"] -= 2.0 * dt  # Shrink effect
@@ -114,25 +113,19 @@ class BlackHole:
 
                 self.crushing_entities.pop(i)
             else:
-                # Update entity size during crushing
-                if entity_data["type"] == "platform":
-                    new_width = int(entity_data["original_size"] * entity_data["scale"])
-                    new_height = int(
-                        entity_data["entity"].rect.height * entity_data["scale"]
-                    )
-                    entity_data["entity"].rect.width = max(new_width, 1)
-                    entity_data["entity"].rect.height = max(new_height, 1)
-                elif entity_data["type"] == "fire_pit":
-                    new_width = int(entity_data["original_size"] * entity_data["scale"])
-                    new_height = int(
-                        entity_data["entity"].rect.height * entity_data["scale"]
-                    )
-                    entity_data["entity"].rect.width = max(new_width, 1)
-                    entity_data["entity"].rect.height = max(new_height, 1)
-                elif entity_data["type"] == "player":
-                    entity_data["entity"].size = max(
-                        int(entity_data["original_size"] * entity_data["scale"]), 1
-                    )
+                # Update visual scaling using pygame.transform.scale
+                new_width = int(entity_data["original_size"] * entity_data["scale"])
+                new_height = int(
+                    entity_data["entity"].rect.height * entity_data["scale"]
+                )
+
+                entity_data["entity"].image = pygame.transform.scale(
+                    entity_data["entity"].original_image,
+                    (max(new_width, 1), max(new_height, 1)),
+                )
+                entity_data["entity"].rect = entity_data["entity"].image.get_rect(
+                    center=entity_data["entity"].rect.center
+                )
 
     def _apply_force_to_player(self, dt, player):
         direction = pygame.Vector2(self.pos.x - player.pos.x, self.pos.y - player.pos.y)
@@ -140,7 +133,7 @@ class BlackHole:
 
         if distance > 0:
             direction = direction / distance
-            force_magnitude = self.attraction_force * (1 / max(distance / 300, 0.5))
+            force_magnitude = self.attraction_force  # * (1 / max(distance / 3, 0.5))
 
             player.vel.x += direction.x * force_magnitude * dt
             player.vel.y += direction.y * force_magnitude * dt
